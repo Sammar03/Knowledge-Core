@@ -79,12 +79,12 @@ npm run dev                      # http://localhost:5173
 
 ## Deployment
 
-### Database → Neon (free, no credit card)
+### Database → Neon 
 1. Create a project at [neon.tech](https://neon.tech) and a database.
 2. Copy the connection string (keep `?sslmode=require`). The app auto-creates the
    `vector` extension, table, and indexes on first run — no manual migration.
 
-### Backend → Hugging Face Spaces (Docker, free, no credit card)
+### Backend → Hugging Face Spaces (Docker)
 1. Create a new Space at [huggingface.co/new-space](https://huggingface.co/new-space) →
    **SDK: Docker** → blank template.
 2. Push the **contents of `/backend`** to the Space repo (the `Dockerfile` and
@@ -104,8 +104,3 @@ npm run dev                      # http://localhost:5173
 2. Set `VITE_API_BASE=https://<user>-<space>.hf.space/api` and `VITE_API_KEY=<same as backend API_KEY>`.
 3. Deploy — `npm run build` → `dist`.
 
-## Notes
-- **Port 8010** is used locally instead of 8000/8001 (both taken on the dev machine).
-- Secrets live only in `.env` (gitignored). `.env.example` documents every variable.
-- No authentication (MVP, per PRD): the deployed API is public. Rate-limited to 60 req/min/IP.
-- Retrieval quality is the main post-MVP iteration area — see `BACKLOG.md`.
