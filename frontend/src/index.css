@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* ChatGPT-style design tokens (see DESIGN.md). */
+@theme {
+  --color-ink-black: #0d0d0d;
+  --color-paper: #f9f9f9;
+  --color-snow: #ffffff;
+  --color-smoke: #5d5d5d;
+  --color-ash: #8f8f8f;
+  --color-fog: #ececec;
+}
+
+/* Light, monochrome theme. */
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: #ffffff;
+  font-feature-settings: "liga" 0;
+}
