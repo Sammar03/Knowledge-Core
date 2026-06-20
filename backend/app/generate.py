@@ -139,10 +139,46 @@ def _build_context_block(chunks: list[Retrieved]) -> str:
     return "\n\n---\n\n".join(parts)
 
 
+def _rewrite_query(message: str, history: list[ChatTurn]) -> str:
+    """Resolve a context-dependent follow-up ("tell me more", "what about X?") into a
+    standalone search query using recent history, so retrieval isn't blind to context.
+    First-turn questions (no history) and any failure fall back to the raw message."""
+    if not history:
+        return message
+    settings = get_settings()
+    convo = "\n".join(
+        f"{t.role}: {t.content}" for t in history[-settings.max_history_turns :]
+    )
+    prompt = (
+        "Rewrite the user's follow-up message as a single standalone search query that "
+        "captures what they are actually asking, resolving pronouns and references using "
+        "the conversation. If the message is already self-contained, return it unchanged. "
+        "Return ONLY the query text, nothing else.\n\n"
+        f"Conversation:\n{convo}\n\nFollow-up: {message}\n\nStandalone query:"
+    )
+    try:
+        out = (
+            _get_client()
+            .chat.completions.create(
+                model=settings.gen_model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0,
+                max_tokens=120,
+            )
+            .choices[0]
+            .message.content
+        )
+        return (out or "").strip() or message
+    except Exception:  # noqa: BLE001 — best-effort; never block answering
+        return message
+
+
 def answer_question(
     message: str, history: list[ChatTurn], top_k: int
 ) -> tuple[str, list[Source], bool]:
-    query_embedding = embed_query(message)
+    # Embed the context-resolved query (not the bare follow-up) so retrieval has signal.
+    search_query = _rewrite_query(message, history)
+    query_embedding = embed_query(search_query)
     # Pull a wider candidate set, then let Groq rerank down to the best top_k.
     retrieved = query(query_embedding, max(top_k * 3, RERANK_CANDIDATES))
     candidates = [r for r in retrieved if r.score >= RELEVANCE_THRESHOLD]
@@ -150,7 +186,7 @@ def answer_question(
     if not candidates:
         return ("I couldn't find that in the documents.", [], False)
 
-    relevant = _rerank(message, candidates, top_k)
+    relevant = _rerank(search_query, candidates, top_k)
 
     settings = get_settings()
     context_block = _build_context_block(relevant)
