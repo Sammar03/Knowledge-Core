@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type DragEvent } from "react";
+import { Menu } from "lucide-react";
 import type { Chat, ChatMessage, DocumentInfo } from "./types";
 import {
   ApiError,
@@ -22,6 +23,8 @@ export default function App() {
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState<{ text: string; error: boolean } | null>(null);
   const [dragging, setDragging] = useState(false);
+  // Mobile only: sidebar is an off-canvas drawer. Always visible on md+ screens.
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   // Admin key is entered at runtime (never shipped in the bundle) and stored
   // only on this device; required to delete documents.
   const [adminKey, setAdminKey] = useState(
@@ -168,13 +171,31 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen bg-snow text-ink-black">
-      <aside className="flex w-[260px] shrink-0 flex-col gap-2 overflow-y-auto bg-paper p-3">
+    <div className="flex h-dvh bg-snow text-ink-black">
+      {/* Mobile backdrop: tap to close the drawer. */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex w-[260px] shrink-0 flex-col gap-2 overflow-y-auto bg-paper p-3 transition-transform md:static md:z-auto md:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         <ChatList
           chats={chats}
           currentId={currentId}
-          onSelect={setCurrentId}
-          onNew={() => setCurrentId(null)}
+          onSelect={(id) => {
+            setCurrentId(id);
+            setSidebarOpen(false);
+          }}
+          onNew={() => {
+            setCurrentId(null);
+            setSidebarOpen(false);
+          }}
           onDelete={handleDeleteChat}
         />
         <div className="mt-2">
@@ -213,7 +234,15 @@ export default function App() {
           </div>
         )}
 
-        <header className="flex items-center px-6 py-3">
+        <header className="flex items-center gap-2 px-4 py-3 md:px-6">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="-ml-1 rounded-md p-1 text-ink-black transition hover:bg-fog md:hidden"
+            title="Open menu"
+            aria-label="Open menu"
+          >
+            <Menu size={22} />
+          </button>
           <span className="text-lg font-semibold tracking-[-0.27px]">Company Database</span>
         </header>
 

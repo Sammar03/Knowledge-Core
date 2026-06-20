@@ -161,7 +161,7 @@ const AIChatInput = ({ onSend, onUpload, disabled = false }: Props) => {
             />
 
             {/* Text Input & Placeholder */}
-            <div className="relative flex-1">
+            <div className="relative min-w-0 flex-1 overflow-hidden">
               <textarea
                 ref={textareaRef}
                 value={inputValue}
