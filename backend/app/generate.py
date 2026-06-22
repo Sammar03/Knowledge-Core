@@ -213,7 +213,6 @@ def answer_question(
                 filename=r.filename,
                 page=r.page,
                 snippet=(r.text[:600] + ("…" if len(r.text) > 600 else "")),
-                score=r.score,
             )
             for i, r in enumerate(relevant, start=1)
         ]

@@ -124,13 +124,11 @@ export default function MessageBubble({ message }: { message: ChatMessage }) {
     openRef !== null ? sources.find((s) => s.id === openRef) : undefined;
 
   // Only surface references the answer actually cites; if it cited none, show all.
-  const citedIds = new Set<number>();
-  let cm: RegExpExecArray | null;
-  CITE_RE.lastIndex = 0;
-  while ((cm = CITE_RE.exec(message.content)) !== null) {
-    const n = parseInt(cm[1], 10);
-    if (validIds.has(n)) citedIds.add(n);
-  }
+  const citedIds = new Set(
+    [...message.content.matchAll(CITE_RE)]
+      .map((m) => parseInt(m[1], 10))
+      .filter((n) => validIds.has(n))
+  );
   const displayedSources = citedIds.size
     ? sources.filter((s) => citedIds.has(s.id))
     : sources;

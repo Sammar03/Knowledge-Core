@@ -97,14 +97,14 @@ def query(embedding: list[float], top_k: int) -> list[Retrieved]:
     ]
 
 
-def list_documents() -> list[tuple[str, int]]:
-    """Return [(filename, chunk_count)] sorted by filename."""
+def list_documents() -> list[str]:
+    """Return distinct filenames, sorted."""
     _ensure_init()
     with _connect() as conn:
         rows = conn.execute(
-            f"SELECT filename, COUNT(*) FROM {TABLE} GROUP BY filename ORDER BY filename"
+            f"SELECT DISTINCT filename FROM {TABLE} ORDER BY filename"
         ).fetchall()
-    return [(r[0], int(r[1])) for r in rows]
+    return [r[0] for r in rows]
 
 
 def delete_document(filename: str) -> int:

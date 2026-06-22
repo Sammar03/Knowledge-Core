@@ -9,7 +9,6 @@ from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 
 from .config import get_settings
-from .models import HealthResponse
 from .routers import chat, documents
 
 app = FastAPI(title="Company Document RAG Assistant", version="1.0.0")
@@ -42,7 +41,7 @@ async def root() -> dict[str, str]:
     return {"service": "company-database-api", "health": "/api/health"}
 
 
-@app.get("/api/health", response_model=HealthResponse)
-async def health() -> HealthResponse:
+@app.get("/api/health")
+async def health() -> dict[str, str]:
     # Lightweight liveness probe — no DB scan (deploy platforms poll this often).
-    return HealthResponse(status="ok")
+    return {"status": "ok"}

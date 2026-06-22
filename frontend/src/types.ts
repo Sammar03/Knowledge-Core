@@ -5,7 +5,6 @@ export interface Source {
   filename: string;
   page: number;
   snippet: string;
-  score: number;
 }
 
 export interface ChatMessage {
@@ -24,17 +23,10 @@ export interface Chat {
 
 export interface DocumentInfo {
   filename: string;
-  chunks: number;
-}
-
-export interface IndexedDocument {
-  filename: string;
-  pages: number;
-  chunks: number;
 }
 
 export interface IngestResponse {
-  indexed: IndexedDocument[];
+  indexed: string[]; // filenames successfully indexed
   errors: string[];
 }
 

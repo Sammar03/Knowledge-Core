@@ -13,7 +13,6 @@ from ..models import (
     DeleteResponse,
     DocumentInfo,
     DocumentListResponse,
-    IndexedDocument,
     IngestResponse,
 )
 from ..vectorstore import add_chunks, delete_document, list_documents
@@ -38,7 +37,7 @@ async def upload_documents(files: list[UploadFile]) -> IngestResponse:
             detail=f"Too many files (max {settings.max_files_per_request} per request).",
         )
     max_bytes = settings.max_upload_mb * 1024 * 1024
-    indexed: list[IndexedDocument] = []
+    indexed: list[str] = []
     errors: list[str] = []
 
     for file in files:
@@ -58,7 +57,7 @@ async def upload_documents(files: list[UploadFile]) -> IngestResponse:
             continue
 
         try:
-            chunks, pages = parse_and_chunk(
+            chunks, _pages = parse_and_chunk(
                 name, data, settings.chunk_size, settings.chunk_overlap
             )
             if not chunks:
@@ -75,7 +74,7 @@ async def upload_documents(files: list[UploadFile]) -> IngestResponse:
             # stale chunks behind (ids are filename::index).
             delete_document(name)
             add_chunks(chunks, embeddings)
-            indexed.append(IndexedDocument(filename=name, pages=pages, chunks=len(chunks)))
+            indexed.append(name)
         except Exception:  # noqa: BLE001 — report per-file, keep going
             # Log the detail server-side; never leak internals to the client.
             logger.exception("Failed to ingest %s", name)
@@ -86,7 +85,7 @@ async def upload_documents(files: list[UploadFile]) -> IngestResponse:
 
 @router.get("", response_model=DocumentListResponse)
 async def get_documents() -> DocumentListResponse:
-    docs = [DocumentInfo(filename=name, chunks=count) for name, count in list_documents()]
+    docs = [DocumentInfo(filename=name) for name in list_documents()]
     return DocumentListResponse(documents=docs)
 
 

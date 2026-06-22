@@ -62,8 +62,10 @@ export async function sendChat(
   message: string,
   history: ChatMessage[]
 ): Promise<ChatResponse> {
+  // Strip UI-only fields; cap at the backend's hard history limit (50).
+  // The backend trims to its own max_history_turns — no need to duplicate that here.
   const trimmed = history
-    .slice(-6)
+    .slice(-50)
     .map((m) => ({ role: m.role, content: m.content }));
   return handle(
     await fetch(`${BASE}/chat`, {
