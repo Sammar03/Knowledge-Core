@@ -2,7 +2,7 @@
 from app.generate import RateLimited, _retry_after_seconds
 
 
-class _Err:  # duck-types RateLimitError: just needs .response.headers.get
+class _Err:
     def __init__(self, retry_after):
         self.response = type("R", (), {"headers": {"retry-after": retry_after}})()
 
