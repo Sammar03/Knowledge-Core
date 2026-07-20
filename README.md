@@ -4,7 +4,7 @@
 
 A company-document RAG assistant. Employees upload PDF, TXT, and Markdown files into a shared
 knowledge base and chat with it to get answers that are grounded in those documents, cited to
-the exact source, and aware of the conversation so far.
+the exact source, and aware of the conversation so far
 
 - **Live demo:** https://knowledge-core-tau.vercel.app
 - Answers are drawn only from uploaded documents; when nothing relevant is found it says so
